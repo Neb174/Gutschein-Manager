@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gutschein-Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #e0f2ff;
+            color: #03396c;
+            position: relative;
+            overflow: hidden;
+        }
+        h2 {
+            text-align: center;
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+        }
+        input {
+            border: 2px solid #0277bd;
+        }
+        button {
+            background-color: #0277bd;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(2, 119, 189, 0.5);
+            transition: box-shadow 0.3s ease;
+        }
+        button:hover {
+            background-color: #01579b;
+            box-shadow: 0 0 20px rgba(2, 119, 189, 0.8);
+        }
+        .gutschein {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .einlösen {
+            background: #4caf50;
+        }
+        .löschen {
+            background: #d32f2f;
+        }
+        .background-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10rem;
+            font-weight: bold;
+            color: rgba(3, 57, 108, 0.1);
+            pointer-events: none;
+            z-index: -1;
+            animation: moveSlightly 5s ease-in-out infinite alternate;
+        }
+        @keyframes moveSlightly {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            100% { transform: translate(-48%, -52%) scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-text">BLEICKE</div>
+    
+    <h2>Gutschein-Manager</h2>
+
+    <h3>Neuen Gutschein hinzufügen</h3>
+    <input type="text" id="gutscheinName" placeholder="Gutschein Name">
+    <input type="number" id="maxEinlösungen" placeholder="Maximale Einlösungen">
+    <button onclick="hinzufügen()">Hinzufügen</button>
+
+    <h3>Gespeicherte Gutscheine</h3>
+    <div id="gutscheinListe"></div>
+
+    <script>
+        let gutscheine = JSON.parse(localStorage.getItem("gutscheine")) || [];
+
+        function speichern() {
+            localStorage.setItem("gutscheine", JSON.stringify(gutscheine));
+            anzeigen();
+        }
+
+        function hinzufügen() {
+            let name = document.getElementById("gutscheinName").value;
+            let max = document.getElementById("maxEinlösungen").value;
+            if (name && max > 0) {
+                gutscheine.push({ name, max, genutzt: 0 });
+                speichern();
+            }
+        }
+
+        function einlösen(index) {
+            if (gutscheine[index].genutzt < gutscheine[index].max) {
+                gutscheine[index].genutzt++;
+                speichern();
+            }
+        }
+
+        function löschen(index) {
+            gutscheine.splice(index, 1);
+            speichern();
+        }
+
+        function anzeigen() {
+            let liste = document.getElementById("gutscheinListe");
+            liste.innerHTML = "";
+            gutscheine.forEach((gutschein, index) => {
+                liste.innerHTML += `
+                    <div class="gutschein">
+                        <p><b>${gutschein.name}</b></p>
+                        <p>Genutzt: ${gutschein.genutzt} / ${gutschein.max}</p>
+                        <button class="einlösen" onclick="einlösen(${index})">Einlösen</button>
+                        <button class="löschen" onclick="löschen(${index})">Löschen</button>
+                    </div>
+                `;
+            });
+        }
+
+        anzeigen();
+    </script>
+
+</body>
+</html>
+
